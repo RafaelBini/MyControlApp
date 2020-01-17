@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_control/detalhes.dart';
 
 class ArgumentosTelaSelecionar {
   final double valor_filho;
@@ -60,10 +59,6 @@ class _SelecionarContaPageState extends State<SelecionarContaPage> {
                   // Define o a referencia para contas
                   CollectionReference contasRef =
                       Firestore.instance.collection("contas");
-
-                  // Define a referencia para transacoes
-                  CollectionReference transRef =
-                      Firestore.instance.collection("transacoes");
 
                   // Recebe o saldo atual da conta mãe
                   DocumentSnapshot snapshot = await contasRef
