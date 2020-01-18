@@ -190,7 +190,7 @@ class _DetalhesPageState extends State<DetalhesPage> {
                         Firestore.instance
                             .collection('contas')
                             .document(widget.doc.documentID)
-                            .setData({
+                            .updateData({
                           "saldo atual": (saldoAtual + doc["valor"]),
                         });
                       },
@@ -274,7 +274,7 @@ class _DetalhesPageState extends State<DetalhesPage> {
           Firestore.instance
               .collection('contas')
               .document(widget.doc.documentID)
-              .setData({
+              .updateData({
             "saldo atual": (saldoAtual - valor),
           });
 

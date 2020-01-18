@@ -83,7 +83,7 @@ class _SelecionarContaPageState extends State<SelecionarContaPage> {
                   Firestore.instance
                       .collection('contas')
                       .document(widget.ats.transacao_mae["conta"])
-                      .setData({
+                      .updateData({
                     "saldo atual": (saldo_mae + widget.ats.valor_filho),
                   });
 
@@ -103,7 +103,7 @@ class _SelecionarContaPageState extends State<SelecionarContaPage> {
                   Firestore.instance
                       .collection('contas')
                       .document(conta_filho)
-                      .setData({
+                      .updateData({
                     "saldo atual": (saldo_filho - widget.ats.valor_filho),
                   });
 

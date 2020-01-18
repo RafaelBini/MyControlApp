@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:my_control/detalhes.dart';
 import 'package:my_control/routeGenerator.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 
 void main() => runApp(MyApp());
 
@@ -28,6 +30,44 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String _messageText = "Waiting for message";
+  String _tokenText = "Waiting for token";
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  @override
+  void initState() {
+    FlutterAppBadger.removeBadge();
+    super.initState();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        setState(() {
+          _messageText = "$message";
+        });
+        print("OnMessage: $message");
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        setState(() {
+          _messageText = "$message";
+        });
+        print("OnLaunch: $message");
+      },
+      onResume: (Map<String, dynamic> message) async {
+        setState(() {
+          _messageText = "$message";
+        });
+        print("OnResume: $message");
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions();
+    _firebaseMessaging.getToken().then((token) {
+      assert(token != null);
+      setState(() {
+        _tokenText = "Push Message Token: $token";
+      });
+      print(_tokenText);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,18 +99,41 @@ class _MyHomePageState extends State<MyHomePage> {
             itemCount: snapshot.data.documents.length,
             itemBuilder: (ctx, index) {
               DocumentSnapshot doc = snapshot.data.documents[index];
-              return ListTile(
-                title: Text(doc.documentID),
-                trailing: Text(
-                  'R\$ ${(doc["saldo atual"] as double).toStringAsFixed(2)}',
-                ),
-                onTap: () {
-                  var route = new MaterialPageRoute(
-                    builder: (ctx) => new DetalhesPage(doc),
-                  );
-                  Navigator.of(context).push(route);
-                },
-              );
+
+              if (doc["notificar"] &&
+                  (doc["saldo inicial"] == null
+                      ? false
+                      : doc["saldo inicial"] <= doc["saldo atual"])) {
+                return Container(
+                  color: Colors.orangeAccent,
+                  child: ListTile(
+                    leading: Icon(Icons.error),
+                    title: Text(doc.documentID),
+                    trailing: Text(
+                      'R\$ ${(doc["saldo atual"] as double).toStringAsFixed(2)}',
+                    ),
+                    onTap: () {
+                      var route = new MaterialPageRoute(
+                        builder: (ctx) => new DetalhesPage(doc),
+                      );
+                      Navigator.of(context).push(route);
+                    },
+                  ),
+                );
+              } else {
+                return ListTile(
+                  title: Text(doc.documentID),
+                  trailing: Text(
+                    'R\$ ${(doc["saldo atual"] as double).toStringAsFixed(2)}',
+                  ),
+                  onTap: () {
+                    var route = new MaterialPageRoute(
+                      builder: (ctx) => new DetalhesPage(doc),
+                    );
+                    Navigator.of(context).push(route);
+                  },
+                );
+              }
             },
           );
         },
